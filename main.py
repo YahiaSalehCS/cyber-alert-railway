@@ -2,17 +2,19 @@ import requests
 import feedparser
 from newspaper import Article
 from deep_translator import GoogleTranslator
+import os
+from datetime import datetime
 
-# بيانات تيليجرام
-BOT_TOKEN = "7412592075:AAG8cJkbs9kO6ScO-2lMkfBOEUDX8GSb3SE"
-CHAT_ID = "1104470111"
+# ✅ متغيرات البيئة
+BOT_TOKEN = os.getenv("BOT_TOKEN")
+CHAT_ID = os.getenv("CHAT_ID")
 
 def send_telegram_message(msg):
     url = f"https://api.telegram.org/bot{BOT_TOKEN}/sendMessage"
     data = {"chat_id": CHAT_ID, "text": msg}
     requests.post(url, data=data)
 
-# 1. تنبيهات CVE
+# ✅ تنبيهات CVE
 def get_latest_cves():
     url = "https://cve.circl.lu/api/last"
     try:
@@ -42,7 +44,7 @@ def get_latest_cves():
     except Exception as e:
         send_telegram_message(f"⚠️ فشل في تحميل CVE من API:\n{e}")
 
-# 2. استخراج + ترجمة
+# ✅ استخراج وترجمة الخبر
 def extract_summary_from_url(url):
     try:
         article = Article(url)
@@ -65,7 +67,7 @@ def extract_summary_from_url(url):
     except Exception as e:
         return f"⚠️ فشل في استخراج أو ترجمة الشرح: {e}"
 
-# 3. أخبار Hacker News
+# ✅ أخبار Hacker News
 def get_hackernews():
     feed = feedparser.parse("https://thehackernews.com/rss.xml")
     for entry in feed.entries[:3]:
@@ -81,6 +83,9 @@ def get_hackernews():
 """
         send_telegram_message(msg)
 
-# 🚀 تشغيل
-get_latest_cves()
-get_hackernews()
+# 🚀 التشغيل الرئيسي
+if __name__ == "__main__":
+    print(f"✅ السكربت بدأ التنفيذ في: {datetime.now()}")
+    get_latest_cves()
+    get_hackernews()
+    print(f"✅ السكربت انتهى في: {datetime.now()}")
